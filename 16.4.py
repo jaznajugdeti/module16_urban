@@ -45,12 +45,13 @@ async def put_data(username: Annotated[str, Path(min_length=5, max_length=20, de
 @app.put('/user/{user_id}/{username}/{age}')
 async def update_user(user_id: Annotated[str, Path(description="Enter your ID")],
     username: Annotated[str, Path(min_length=5, max_length=20, description='Enter username', example='UrbanUser')],
-    age: Annotated[int, Path(ge=18, le=120, description='Enter age', example='24')]) -> str:
+    age: Annotated[int, Path(ge=18, le=120, description='Enter age', example='24')]) -> User:
     try:
-        if user_id in users:
-            User.username = username
-            User.age = age
-            return User
+        for user in users:
+            if user.id == user_id:
+                user.username = username
+                user.age = age
+            return user
     except IndexError:
         raise HTTPException(status_code=404, detail='Message not found')
 # delete запрос по маршруту '/user/{user_id}', теперь:
@@ -62,9 +63,9 @@ async def update_user(user_id: Annotated[str, Path(description="Enter your ID")]
 @app.delete('/user/{user_id}')
 async def delete_message(user_id: Annotated[str, Path(description="Enter your ID")]) -> str:
     try:
-        if user_id in users:
-            users.pop(user_id)
-            return User
+        for user in users:
+            if user.id == user_id:
+                users.pop(user_id)
+                return user
     except IndexError:
         raise HTTPException(status_code=404, detail='Message not found')
-
